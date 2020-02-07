@@ -1,0 +1,7 @@
+<launch>
+	<!-- comment here -->
+	<node name="coordinator_node" pkg="coordinator" type="coordinator_node.py"></node>
+	<node name="out_loop_node" pkg="out_loop" type="out_loop_node.py"></node>
+	<node name="in_loop_node" pkg="in_loop" type="in_loop_node.py"></node>
+	<node name="in_loop_2_node" pkg="in_loop_2" type="in_loop_2_node.py"></node>
+</launch>
