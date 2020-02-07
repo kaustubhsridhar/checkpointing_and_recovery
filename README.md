@@ -1,6 +1,9 @@
 # Checkpointing and roll-forward recovery for Hierarchical Distributed Control CPS
 ROS packages for numerical simulation of checkpointing and roll-forward recovery of state estimates in differential drive mobile robot (and DC motor) system under sensor attacks.
 
+## Preliminaries
+Install ROS (http://wiki.ros.org/kinetic/Installation/Ubuntu)
+
 ## Installation instructions
 Run the following
 ```
