@@ -3,20 +3,24 @@
 import rospy
 from std_msgs.msg import String
 from out_loop.msg import out_control
+from out_loop.msg import anomaly
 from in_loop_2.msg import in_control_2
 from in_loop.msg import in_control
 from coordinator.msg import ckpt_info
+from rf_coordinator.msg import check_info
 from safe_auto_nonlinear_car import safe_auto_nonlinear
 import numpy as np
  
 class outer_controller():
 	def __init__(self):
 		self.pub = rospy.Publisher('/out_control_vals', out_control, queue_size=10)
+		self.pub_anom = rospy.Publisher('/out_anomaly', anomaly, queue_size=10)
 		self.time_to_CkPt_val = 0
 		self.start_time = rospy.get_time()
 		self.u = np.array([[0],[0]])
 
 		self.vR = -1; self.vL = -1
+		self.check = 0; self.updated_check = 0
 	
 	def subscribe_to_ckpt_info(self, event=None):
 		#s_str = "-------------------------- %s" % rospy.get_time()
@@ -25,6 +29,12 @@ class outer_controller():
 
 	def ckpt_callback(self, data):
 		self.time_to_CkPt_val = data.time_to_ckpt
+
+	def subscribe_to_check_info(self, event=None):
+		rospy.Subscriber('/check_info_vals', check_info, self.check_callback)
+
+	def check_callback(self, data):
+		self.updated_check = data.check
 
 	def subscribe_to_volts(self, event=None):
 		#s_str = "-------------------------- %s" % rospy.get_time()
@@ -46,6 +56,11 @@ class outer_controller():
 		#p_str = "publishing now at %s" % rospy.get_time()
 		#rospy.loginfo(p_str)
 		self.pub.publish(oc_msg)
+
+	def publish_to_anomaly(self, event=None):
+		oc_msg = anomaly()
+		oc_msg.check_anomaly = self.check
+		self.pub_anom.publish(oc_msg)
 
 
 def main():
@@ -95,11 +110,17 @@ def main():
 		sys.NOW_old = sys.NOW
 
 		# main code
-		check = sys.anomaly_detect()
+		oc.check = sys.anomaly_detect()
+
+		# publish to anomaly topic & subscribe to check
+		oc.publish_to_anomaly()
+		oc.subscribe_to_check_info()
+		sys.check = oc.updated_check
+
 		x_estimate = sys.get_x_estimate_from_sensors()
-		if check == 0:
+		if sys.check == 0:
 			sys.x, sys.y = x_estimate, sys.func_g(x_estimate)
-		elif check == 1:
+		elif sys.check == 1:
 			t0RF = rospy.get_time()
 			sys.x, sys.y = sys.RollForward(x_estimate)
 			dt0RF = rospy.get_time() - t0RF
@@ -107,12 +128,12 @@ def main():
 			RF_time_appended = 1
 		sys.u = sys.StartControl(tuning_params)
 
-		# Create another ROS Timer for publishing data at 1/ (B hz)
+		# publish control
 		wR, wL = transform(sys.u)
 		oc.u = np.array([[wR],[wL]])
 		oc.publish_to_out()
 
-		# Create a ROS Timer for reading data at 1/ (A hz)
+		# subscribe to ckpt time
 		oc.subscribe_to_ckpt_info()
 		sys.time_to_CkPt_val = oc.time_to_CkPt_val
 

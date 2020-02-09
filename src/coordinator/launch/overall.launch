@@ -4,4 +4,5 @@
 	<node name="out_loop_node" pkg="out_loop" type="out_loop_node.py"></node>
 	<node name="in_loop_node" pkg="in_loop" type="in_loop_node.py"></node>
 	<node name="in_loop_2_node" pkg="in_loop_2" type="in_loop_2_node.py"></node>
+	<node name="rf_coordinator_node" pkg="rf_coordinator" type="rf_coordinator_node.py"></node>
 </launch>

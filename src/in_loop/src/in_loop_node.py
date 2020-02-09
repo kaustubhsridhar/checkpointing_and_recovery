@@ -4,7 +4,9 @@ import rospy
 from std_msgs.msg import String
 from in_loop.msg import in_control
 from out_loop.msg import out_control
+from out_loop.msg import anomaly
 from coordinator.msg import ckpt_info
+from rf_coordinator.msg import check_info
 from safe_auto_nonlinear import safe_auto_nonlinear
 import numpy as np
 from scipy import signal
@@ -12,11 +14,13 @@ from scipy import signal
 class inner_controller():
 	def __init__(self):
 		self.pub = rospy.Publisher('/vR_vals', in_control, queue_size=10)
+		self.pub_anom = rospy.Publisher('/in_anomaly_R', anomaly, queue_size=10)
 		self.wRd = -1;
 		#self.wLd = -1;
 		self.time_to_CkPt_val = 0
 		self.start_time = rospy.get_time() - 0.1 # to avoid divide by dt of 0 in pid
 		self.u = np.array([[0],[0]])
+		self.check = 0; self.updated_check = 0
 	
 	def subscribe_to_ckpt_info(self, event=None):
 		#s_str = "-------------------------- %s" % rospy.get_time()
@@ -25,6 +29,12 @@ class inner_controller():
 
 	def ckpt_callback(self, data):
 		self.time_to_CkPt_val = data.time_to_ckpt
+
+	def subscribe_to_check_info(self, event=None):
+		rospy.Subscriber('/check_info_vals', check_info, self.check_callback)
+
+	def check_callback(self, data):
+		self.updated_check = data.check
 
 	def subscribe_to_out(self, event=None):
 		#s_str = "subscribing now at %s" % rospy.get_time()
@@ -43,6 +53,11 @@ class inner_controller():
 		#p_str = "publishing now at %s" % rospy.get_time()
 		#rospy.loginfo(p_str)
 		self.pub.publish(ic_msg)
+
+	def publish_to_anomaly(self, event=None):
+		ic_msg = anomaly()
+		ic_msg.check_anomaly = self.check
+		self.pub_anom.publish(ic_msg)
 
 
 def main():
@@ -86,11 +101,17 @@ def main():
 		sys.NOW_old = sys.NOW
 
 		# main code
-		check = sys.anomaly_detect()
+		ic.check = sys.anomaly_detect()
+
+		# publish to anomaly topic & subscribe to check
+		ic.publish_to_anomaly()
+		ic.subscribe_to_check_info()
+		sys.check = ic.updated_check
+
 		x_estimate = sys.get_x_estimate_from_sensors()
-		if check == 0:
+		if sys.check == 0:
 			sys.x, sys.y = x_estimate, sys.func_g(x_estimate)
-		elif check == 1:
+		elif sys.check == 1:
 			t0RF = rospy.get_time()
 			sys.x, sys.y = sys.RollForward(x_estimate)
 			dt0RF = rospy.get_time() - t0RF

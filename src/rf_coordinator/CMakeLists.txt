@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(out_loop)
+project(rf_coordinator)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -51,8 +51,7 @@ find_package(catkin REQUIRED COMPONENTS
 # Generate messages in the 'msg' folder
 add_message_files(
   FILES
-  out_control.msg
-  anomaly.msg
+  check_info.msg
 )
 
 ## Generate services in the 'srv' folder
