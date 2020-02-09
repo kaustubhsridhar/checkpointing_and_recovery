@@ -18,6 +18,23 @@ git clone https://github.com/kaustubhsridhar/checkpointing_and_recovery.git
 ```
 catkin_make
 ```
+Make all python nodes executable
+```
+cd ~/catkin_ws/src/coordinator/src/
+chmod +x coordinator_node.py
+cd 
+cd ~/catkin_ws/src/out_loop/src/
+chmod +x out_loop_node.py
+cd 
+cd ~/catkin_ws/src/in_loop/src/
+chmod +x in_loop_node.py
+cd 
+cd ~/catkin_ws/src/in_loop_2/src/
+chmod +x in_loop_2_node.py
+cd 
+cd ~/catkin_ws/src/rf_coordinator/src/
+chmod +x rf_coordinator_node.py
+```
 ## Instructions to run simulation
 Open two terminals and in each source build file
 
