@@ -8,7 +8,7 @@ from in_loop_2.msg import in_control_2
 from in_loop.msg import in_control
 from coordinator.msg import ckpt_info
 from rf_coordinator.msg import check_info
-from safe_auto_nonlinear_car import safe_auto_nonlinear
+from safe_auto_nonlinear_all import safe_auto_nonlinear_car
 import numpy as np
  
 class outer_controller():
@@ -94,7 +94,7 @@ def main():
 
 	# Create an instance of class
 	oc = outer_controller()
-	sys = safe_auto_nonlinear(func_f, func_A, func_g, func_C, x0, u0, y0, CKPT_INT, std, T, attk_detect_method, estimation_method, u_type, devID)
+	sys = safe_auto_nonlinear_car(func_f, func_A, func_g, func_C, x0, u0, y0, CKPT_INT, std, T, attk_detect_method, estimation_method, u_type, devID)
 
 	r = rospy.Rate(10)
 	while sys.NOW<T:

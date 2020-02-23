@@ -7,7 +7,7 @@ from out_loop.msg import out_control
 from out_loop.msg import anomaly
 from coordinator.msg import ckpt_info
 from rf_coordinator.msg import check_info
-from safe_auto_nonlinear import safe_auto_nonlinear
+from safe_auto_nonlinear_all import safe_auto_nonlinear
 import numpy as np
 from scipy import signal
  
@@ -70,7 +70,7 @@ def main():
 		A_d = signal.cont2discrete((A,B,C,D), dt)[0]
 		B_d = signal.cont2discrete((A,B,C,D), dt)[1]
 		return np.matmul(A_d, x) + np.matmul(B_d, u)
-	def func_A(x):	# A = del f(x,u)/ del x
+	def func_A(x,u):	# A = del f(x,u)/ del x
 		return A
 	def func_g(x,u=0):	# y = g(x,u)
 		return np.matmul(C, x)
