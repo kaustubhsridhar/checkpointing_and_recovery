@@ -64,7 +64,7 @@ def main():
 	rospy.init_node('in_loop_node', anonymous=False) 
 
 	# system description for diff drive mobile robot
-	R = 1; L = 0.5; K = 0.01; J = 0.01; sigma=(0.001)**0.5; wr = 2; delta = 0.3;
+	R = 1; L = 0.5; K = 0.01; J = 0.01; wr = 2; delta = 0.3;
 	A = np.array([[-R/L, -K/L],[K/J, -K/J]]); B = np.array([[1/L],[0]]); C = np.array([[0,1]]); D = np.array([[0]])
 	def func_f(x,u,dt):	# x_{k+1} = f(x_k,u_k)
 		A_d = signal.cont2discrete((A,B,C,D), dt)[0]
@@ -79,7 +79,7 @@ def main():
 	x0=np.array([[0],[0]]); u0=np.array([[0.001]]); y0=np.array([[0]]); devID = np.array([[1],[1]]);
 	Kp = 6.6/0.5; Kd = 1.1/4; Ki = 6.1/4
 	tuning_params = [Kp, Kd, Ki]; u_type = "PID"
-	T = 12; CKPT_INT = 1; std = 0.1 
+	T = 12; CKPT_INT = 1; std = 500
 	attk_detect_method="interval" # interval
 	estimation_method="Kalman" # Kalman
 
@@ -111,6 +111,7 @@ def main():
 		x_estimate = sys.get_x_estimate_from_sensors()
 		if sys.check == 0:
 			sys.x, sys.y = x_estimate, sys.func_g(x_estimate)
+			sys.rf_count = 0 # reset to 0 for next rf to start from ckpt
 		elif sys.check == 1:
 			t0RF = rospy.get_time()
 			sys.x, sys.y = sys.RollForward(x_estimate)

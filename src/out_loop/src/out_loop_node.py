@@ -120,6 +120,7 @@ def main():
 		x_estimate = sys.get_x_estimate_from_sensors()
 		if sys.check == 0:
 			sys.x, sys.y = x_estimate, sys.func_g(x_estimate)
+			sys.rf_count = 0 # reset to 0 for next rf to start from ckpt
 		elif sys.check == 1:
 			t0RF = rospy.get_time()
 			sys.x, sys.y = sys.RollForward(x_estimate)

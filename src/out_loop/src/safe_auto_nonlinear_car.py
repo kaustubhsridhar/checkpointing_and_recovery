@@ -36,6 +36,7 @@ class safe_auto_nonlinear(object):
 
 	self.time_to_CkPt_val = 0; self.NOW_old = 0; self.dt_list = []; self.NOW_list = []	
 	self.CkPt_buffer_time_list = []; self.RF_time_list = []; self.other_time_list = []
+	self.rf_count = 0
         
     def anomaly_detect(self):
         # attack detection algo goes here
@@ -114,17 +115,25 @@ class safe_auto_nonlinear(object):
         return self.u
     
     def RollForward(self, x_prev):
-        x = self.CkPt[0]
-            
-        if self.rollfwd_method == "DeadReck":
-            self.t_of_CkPt_used_DeadReck.append(self.t_r)
-            No = int((self.NOW-self.t_r)/self.dt)-1
-            for i in range(No):
-		#print(No, len(self.ustore), i)
-                x = self.func_f(x, self.ustore[i], self.dt)
-            self.t_when_CkPt_used_DeadReck.append(self.NOW)
-            x[np.where(self.devID==1)] = x_prev[np.where(self.devID==1)]
-            #x[np.where(self.devID==0)] = x[np.where(self.devID==0)]
+	# if this is the first roll-forward, roll-forward from the last checkpoint
+	self.t_of_CkPt_used_DeadReck.append(self.t_r)
+	if self.rf_count == 0:   
+		self.rf_count = 1     
+		x = self.CkPt[0]
+		    
+		if self.rollfwd_method == "DeadReck":
+
+		    No = int((self.NOW-self.t_r)/self.dt)-1
+		    for i in range(No):
+			#print(No, len(self.ustore), i)
+		        x = self.func_f(x, self.ustore[i], self.dt)
+	# if this is second+ roll-forward, just rf from previous roll-forward predicted val	
+	else:
+		x = self.func_f(self.x, self.ustore[-1], self.dt)
+	
+	self.t_when_CkPt_used_DeadReck.append(self.NOW)
+	x[np.where(self.devID==1)] = x_prev[np.where(self.devID==1)]
+	#x[np.where(self.devID==0)] = x[np.where(self.devID==0)]
         
         return x, self.func_g(x)
         
