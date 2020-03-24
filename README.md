@@ -2,7 +2,7 @@
 ROS packages for numerical simulation of checkpointing and roll-forward recovery of state estimates in differential drive mobile robot (and DC motor) system under sensor attacks.
 
 ## Update Notes
-* INHERITED CLASSES USED!
+* INHERITED CLASSES USED! (same safe_auto_nonlinear_all.py file in src of each controller node - out or in)
 * In this version of SRSC framework, state is predicted for first time step with sensor attack by rolling-forward all the way from the ckpt and for every subsequent attacked time step with saved previously predicted value
 
 ## Preliminaries
