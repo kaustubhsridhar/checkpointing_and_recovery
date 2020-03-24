@@ -65,4 +65,4 @@ roslaunch coordinator overall.launch
 ```
 
 
-More documentation can be found at:- https://drive.google.com/open?id=1AMkvtVj9qy1y-yGgW7vhpE7YUGtaTZIl1O7uvYSZUp8
+More documentation can be found at:- https://docs.google.com/document/d/1_nz2afkh-SWOh0j6m1g7FoTotDnMQovMn6eUlM3usv8/edit?usp=sharing
