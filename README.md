@@ -50,7 +50,7 @@ cd ~/catkin_ws/src/rf_coordinator/src/
 chmod +x rf_coordinator_node.py
 ```
 ## Instructions to run simulation
-Open two terminals and in each source build file
+Open two terminals and in each, source build file,
 
 ```
 source ~/catkin_ws/devel/setup.bash
