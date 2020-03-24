@@ -9,6 +9,16 @@ ROS packages for numerical simulation of checkpointing and roll-forward recovery
 Install ROS (http://wiki.ros.org/kinetic/Installation/Ubuntu)
 
 ## Installation instructions
+Python package prerequisites
+```
+pip install scipy
+```
+```
+pip install matplotlib
+```
+```
+pip install numpy
+```
 Run the following
 ```
 mkdir ~/catkin_ws/
