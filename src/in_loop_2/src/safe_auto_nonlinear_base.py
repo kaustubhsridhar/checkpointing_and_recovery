@@ -116,8 +116,8 @@ class safe_auto_nonlinear(object):
         return x, self.func_g(x)
         
     def Advance(self):
-        w = np.reshape(np.random.normal(0, 0.1, len(self.x)), self.x.shape) #process noise
-        v = np.reshape(np.random.normal(0, 0.1, len(self.y)), self.y.shape) #sensor noise
+        w = np.transpose( np.random.multivariate_normal(np.zeros(len(self.x)), self.Q, (1)) ) #process noise
+        v = np.transpose( np.random.multivariate_normal(np.zeros(len(self.y)), self.R, (1)) ) #sensor noise
         self.x = self.func_f(self.x, self.u, self.dt) + w
         self.y = self.func_g(self.x) + v       
         

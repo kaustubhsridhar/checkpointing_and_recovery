@@ -80,13 +80,7 @@ class safe_auto_nonlinear_ddrive(safe_auto_nonlinear):
             self.u = np.array([[0],[0]])
             
         #self.pub_to_actuator()
-        return self.u
-
-    def Advance(self):
-        w = np.reshape(np.random.normal(0, 0.1, len(self.x)), self.x.shape) #process noise
-        v = np.reshape(np.random.normal(0, 0.1, len(self.y)), self.y.shape) #sensor noise
-        self.x = self.func_f(self.x, self.u, self.dt) + w
-        self.y = self.func_g(self.x) + v 
+        return self.u 
 
     def generate_error(self):
 	if self.NOW>=(self.s1-self.dt) and self.NOW<self.e1:
@@ -97,7 +91,6 @@ class safe_auto_nonlinear_ddrive(safe_auto_nonlinear):
             err = 0
 
 	return err
-
 
     def plot_curves_car(self):
 
