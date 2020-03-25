@@ -5,8 +5,8 @@ from matplotlib import pyplot as plt
 from safe_auto_nonlinear_base import safe_auto_nonlinear 
 
 class safe_auto_nonlinear_ddrive(safe_auto_nonlinear):
-    def __init__(self, func_f, func_A, func_g, func_C, x0, u0, y0, interval, T, EM, u_type, devID, Q, R, RFM="DeadReck"):
-	super(safe_auto_nonlinear_ddrive, self).__init__(func_f, func_A, func_g, func_C, x0, u0, y0, interval, T, EM, u_type, devID, Q, R, RFM="DeadReck") # brings everything over from parent class
+    def __init__(self, func_f, func_A, func_g, func_C, x0, u0, y0, interval, T, EM, u_type, devID, Q, R):
+	super(safe_auto_nonlinear_ddrive, self).__init__(func_f, func_A, func_g, func_C, x0, u0, y0, interval, T, EM, u_type, devID, Q, R) # brings everything over from parent class
 	# add new variables for this child class below
 	self.e = 0; self.eder = 0; self.esum = 0 
 	self.time_to_CkPt_val = 0; self.NOW_old = 0
@@ -187,7 +187,7 @@ class safe_auto_nonlinear_ddrive(safe_auto_nonlinear):
 
 	plt.figure(7)
 	plt.plot(xaxis, self.CkPt_buffer_time_list, xaxis, self.RF_time_list, xaxis, self.other_time_list)
-	plt.legend(['time to load checkpoint', 'time for RF', 'time for other'], prop={"size":20})
+	plt.legend(['time to check and save checkpoint', 'time for RF', 'time for other'], prop={"size":20})
 	plt.ylabel("time", fontsize=20)
         plt.xlabel("time step", fontsize=20)
         plt.grid()

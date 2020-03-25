@@ -8,7 +8,7 @@ from out_loop.msg import anomaly
 from coordinator.msg import ckpt_info
 from rf_coordinator.msg import check_info
 import numpy as np
-from safe_auto_nonlinear_base import safe_auto_nonlinear
+from safe_auto_nonlinear_base import safe_auto_nonlinear, timer_start
 from in_system_description import system_description
  
 class inner_controller():
@@ -56,74 +56,63 @@ def main():
 	# Create instance(s) of class(es)
 	sd = system_description()
 	ic = inner_controller()
-	sys = safe_auto_nonlinear(sd.func_f, sd.func_A, sd.func_g, sd.func_C, sd.x0, sd.u0, sd.y0, sd.CKPT_INT, sd.T, sd.estimation_method, sd.u_type, sd.devID, sd.Q, sd.R)
+	safe = safe_auto_nonlinear(sd.func_f, sd.func_A, sd.func_g, sd.func_C, sd.x0, sd.u0, sd.y0, sd.CKPT_INT, sd.T, sd.estimation_method, sd.u_type, sd.devID, sd.Q, sd.R)
 	
 	r = rospy.Rate(100)
-	while sys.NOW<sd.T+0.1:  #see ic.start_time in constructor
-		t0O = rospy.get_time()
-		RF_time_appended = 0; C_time_appended = 0
+	while safe.NOW<sd.T+0.1:  #see ic.start_time in constructor
 		# basic time init (to change)
-		sys.NOW = round(rospy.get_time() - ic.start_time, 2); 
-		sys.dt = round(sys.NOW - sys.NOW_old,2); 
-		if sys.dt == 0: #for simulation (to avoid division by 0)
+		Overall_t = timer_start()
+		safe.NOW = round(rospy.get_time() - ic.start_time, 2)
+		safe.dt = round(safe.NOW - safe.NOW_old,2)
+		if safe.dt == 0: #for simulation (to avoid division by 0)
 			continue
-		sys.NOW_list.append(sys.NOW); sys.dt_list.append(sys.dt)
-		print("(round and not)time is ", sys.NOW, rospy.get_time() - ic.start_time, " and dt is ", sys.dt)
-		sys.NOW_old = sys.NOW
+		safe.NOW_list.append(safe.NOW); safe.dt_list.append(safe.dt)
+		safe.NOW_old = safe.NOW
 
-		# main code
-		ic.check = sys.anomaly_detect()
+		# check for anomaly
+		ic.check = safe.anomaly_detect()
 
 		# publish to anomaly topic & subscribe to check
 		ic.publish_to_anomaly()
 		ic.subscribe_to_check_info()
-		sys.check = ic.updated_check
+		safe.check = ic.updated_check
 
 		# get estimate and then rf if attack detected
-		x_estimate = sys.get_x_estimate_from_sensors()
-		if sys.check == 0:
-			sys.x, sys.y = x_estimate, sys.func_g(x_estimate)
-			sys.rf_count = 0 # reset to 0 for next rf to start from ckpt
-		elif sys.check == 1:
-			t0RF = rospy.get_time()
-			sys.x, sys.y = sys.RollForward(x_estimate)
-			dt0RF = rospy.get_time() - t0RF
-			sys.RF_time_list.append(dt0RF)
-			RF_time_appended = 1
+		x_estimate = safe.get_x_estimate_from_sensors()
+		if safe.check == 0:
+			safe.x, safe.y = x_estimate, safe.func_g(x_estimate)
+			safe.RF_time_list.append(0)
+		elif safe.check == 1:
+			RF_t = timer_start()
+			safe.x, safe.y = safe.RollForward(x_estimate)
+			safe.RF_time_list.append(RF_t.elapsed())
 
-		# Create a ROS Timer for reading data at 1/ (A hz)
+		# Subscribe to out_control topic to get reference trajectory for inner controller
 		ic.subscribe_to_out()
 		w_d = np.array([[ic.wRd]])
 		
 		# control
-		sys.u = sys.StartControl(w_d)
+		safe.u = safe.StartControl(w_d)
 
-		# Create another ROS Timer for publishing data at 1/ (B hz)
-		ic.u = sys.u[0,0]
+		# publish control
+		ic.u = safe.u[0,0]
 		ic.publish_to_in()
 
-		# Create a ROS Timer for reading data at 1/ (A hz)
+		# subscribe to ckpt_info to get go-ahead to create checkpoint
 		ic.subscribe_to_ckpt_info()
-		sys.time_to_CkPt_val = ic.time_to_CkPt_val
+		safe.time_to_CkPt_val = ic.time_to_CkPt_val
 
-		if sys.time_to_CkPt_coordinated() == 1:
-			t0C = rospy.get_time()
-			sys.create_CkPt()
-			dt0C = rospy.get_time()-t0C
-			sys.CkPt_buffer_time_list.append(dt0C)
-			C_time_appended = 1
+		# check if time to checkpoint and create checkpoint
+		CkPt_check_and_save_t = timer_start()
+		if safe.time_to_CkPt_coordinated() == 1:
+			safe.create_CkPt()
+		safe.CkPt_buffer_time_list.append(CkPt_check_and_save_t.elapsed())
 
-		if C_time_appended == 0:
-			sys.CkPt_buffer_time_list.append(0); dt0C = 0
-		if RF_time_appended == 0:
-			sys.RF_time_list.append(0); dt0RF = 0
-
-		dt0O = rospy.get_time() - t0O - dt0C - dt0RF
-		sys.other_time_list.append(dt0O)
+		safe.other_time_list.append(Overall_t.elapsed() - safe.RF_time_list[-1] - safe.CkPt_buffer_time_list[-1])
 		r.sleep()
 
 	print("PLOTS UPCOMING")
-	sys.plot_curves()
+	safe.plot_curves()
 
 	# Don't forget this or else the program will exit
 	rospy.spin()

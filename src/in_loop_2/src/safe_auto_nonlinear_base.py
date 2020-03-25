@@ -1,13 +1,20 @@
 import numpy as np
+import rospy
 from scipy.linalg import expm
 from matplotlib import pyplot as plt
 
+class timer_start():
+    def __init__(self):
+        self.t_start = rospy.get_time()
+    def elapsed(self):
+        return rospy.get_time() - self.t_start
+
 class safe_auto_nonlinear(object):
     # Constructor
-    def __init__(self, func_f, func_A, func_g, func_C, x0, u0, y0, interval, T, EM, u_type, devID, Q, R, RFM="DeadReck"):
+    def __init__(self, func_f, func_A, func_g, func_C, x0, u0, y0, interval, T, EM, u_type, devID, Q, R):
         self.NOW = 0; self.check = 0;  
         
-        self.rollfwd_method = RFM; self.estimation_method = EM
+        self.estimation_method = EM
         self.T = T; self.dt = 0; self.t_r = self.NOW
         self.x = x0; self.u = u0; self.y = y0; self.CkPt = np.array([x0,u0,y0]); 
         self.xe = x0
@@ -80,16 +87,11 @@ class safe_auto_nonlinear(object):
     def RollForward(self, x_prev):
 	# if this is the first roll-forward, roll-forward from the last checkpoint
 	self.t_of_CkPt_used_DeadReck.append(self.t_r)
-	if self.rf_count == 0:   
-		self.rf_count = 1     
+	if self.prev_check == 0 and self.check == 1:
 		x = self.CkPt[0]
-		    
-		if self.rollfwd_method == "DeadReck":
-
-		    No = int((self.NOW-self.t_r)/self.dt)-1
-		    for i in range(len(self.ustore)):
-			#print(No, len(self.ustore), i)
-		        x = self.func_f(x, self.ustore[i], self.dt)
+		No = int((self.NOW-self.t_r)/self.dt)-1
+		for i in range(len(self.ustore)):
+		    x = self.func_f(x, self.ustore[i], self.dt)
 	# if this is second+ roll-forward, just rf from previous roll-forward predicted val	
 	else:
 		x = self.func_f(self.x, self.ustore[-1], self.dt)
@@ -103,15 +105,14 @@ class safe_auto_nonlinear(object):
     def RollForward_slow(self, x_prev):
         x = self.CkPt[0]
             
-        if self.rollfwd_method == "DeadReck":
-            self.t_of_CkPt_used_DeadReck.append(self.t_r)
-            No = int((self.NOW-self.t_r)/self.dt)-1
-            for i in range(len(self.ustore)):
+        self.t_of_CkPt_used_DeadReck.append(self.t_r)
+        No = int((self.NOW-self.t_r)/self.dt)-1
+        for i in range(len(self.ustore)):
 		#print(No, len(self.ustore), i)
-                x = self.func_f(x, self.ustore[i], self.dt)
-            self.t_when_CkPt_used_DeadReck.append(self.NOW)
-            x[np.where(self.devID==1)] = x_prev[np.where(self.devID==1)]
-            #x[np.where(self.devID==0)] = x[np.where(self.devID==0)]
+        	x = self.func_f(x, self.ustore[i], self.dt)
+        self.t_when_CkPt_used_DeadReck.append(self.NOW)
+        x[np.where(self.devID==1)] = x_prev[np.where(self.devID==1)]
+        #x[np.where(self.devID==0)] = x[np.where(self.devID==0)]
         
         return x, self.func_g(x)
         
@@ -252,7 +253,7 @@ class safe_auto_nonlinear(object):
 
 	plt.figure(14)
 	plt.plot(xaxis, self.CkPt_buffer_time_list, xaxis, self.RF_time_list, xaxis, self.other_time_list)
-	plt.legend(['time to load checkpoint', 'time for RF', 'time for other'], prop={"size":20})
+	plt.legend(['time to check and save checkpoint', 'time for RF', 'time for other'], prop={"size":20})
 	plt.ylabel("time", fontsize=20)
         plt.xlabel("time step", fontsize=20)
         plt.grid()
