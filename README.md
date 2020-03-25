@@ -1,6 +1,8 @@
 # Checkpointing and roll-forward recovery for Hierarchical Distributed Control CPS (SRSC framework)
 ROS packages for numerical simulation of checkpointing and roll-forward recovery of state estimates in differential drive mobile robot (and DC motor) system under sensor attacks.
 
+Detailed documentation can be found at:- https://docs.google.com/document/d/1_nz2afkh-SWOh0j6m1g7FoTotDnMQovMn6eUlM3usv8/edit?usp=sharing
+
 ## Update Notes
 * system descriptions python files for each of inner and outer loops created
 * safe_auto_nonlinear_ddrive of outer loop inherits from safe_auto_nonlinear_base
@@ -65,5 +67,3 @@ In second terminal,
 roslaunch coordinator overall.launch
 ```
 
-
-More documentation can be found at:- https://docs.google.com/document/d/1_nz2afkh-SWOh0j6m1g7FoTotDnMQovMn6eUlM3usv8/edit?usp=sharing
