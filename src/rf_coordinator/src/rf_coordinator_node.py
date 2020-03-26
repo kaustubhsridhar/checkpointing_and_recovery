@@ -17,9 +17,9 @@ class coordinator():
 		else:
 			msg.check = 0
 
-		p_str = "each check now at %s" % rospy.get_time()
-		rospy.loginfo(p_str)
-		print(self.check_out, self.check_in_R, self.check_in_L, msg.check)
+		#p_str = "each check now at %s" % rospy.get_time()
+		#rospy.loginfo(p_str)
+		#print(self.check_out, self.check_in_R, self.check_in_L, msg.check)
 		self.pub.publish(msg)
 
 	def subscribe_to_out_anom(self, event=None):
