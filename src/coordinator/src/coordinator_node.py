@@ -18,8 +18,8 @@ class coordinator():
 			msg.time_to_ckpt = 0
 		self.count += 1
 		
-		p_str = "publishing now at %s" % rospy.get_time()
-		rospy.loginfo(p_str)
+		#p_str = "publishing now at %s" % rospy.get_time()
+		#rospy.loginfo(p_str)
 		self.pub.publish(msg)
 
 
