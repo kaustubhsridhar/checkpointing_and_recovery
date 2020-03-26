@@ -182,6 +182,8 @@ class safe_auto_nonlinear_ddrive(safe_auto_nonlinear):
 
 	plt.figure(6)
 	plt.plot(xaxis, self.dt_list)
+	plt.ylabel("time step size", fontsize=20)
+        plt.xlabel("time step", fontsize=20)
         plt.grid()
 	plt.show()
 
