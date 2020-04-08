@@ -9,11 +9,12 @@ class system_description():
 		self.x0=np.array([[0],[0]]); self.u0=np.array([[0.001]]); self.y0=np.array([[0]]); # initial values
 		self.devID = np.array([[1],[1]]) # all 2 sensors are not attacked at start
 		self.u_type = "PID" # PID DC motor control
-		self.Q = (500**2) * np.eye(len(self.x0)) # process cov matrix
-		self.R = (500**2) * np.eye(len(self.y0)) # measurement cov matrix
+		self.Q = (200**2) * np.eye(len(self.x0)) # process cov matrix
+		self.R = (200**2) * np.eye(len(self.y0)) # measurement cov matrix
 		self.estimation_method="Kalman" # Kalman or none (for direct sensor measurments)
 		self.T = 12 # run loop for 12 seconds
 		self.CKPT_INT = 1 # create checkpoints every one second
+		self.error_analysis = 1; # 1 if you want error analysis plot
 
 	def func_f(self,x,u,dt):	# x_{k+1} = f(x_k,u_k) and x=[x,y,theta]
 		Mats = signal.cont2discrete((self.A,self.B,self.C,self.D), dt)

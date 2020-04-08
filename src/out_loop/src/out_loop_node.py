@@ -65,7 +65,7 @@ def main():
 	# Create instance(s) of class(es)
 	sd = system_description()
 	oc = outer_controller()
-	safe = safe_auto_nonlinear_ddrive(sd.func_f, sd.func_A, sd.func_g, sd.func_C, sd.x0, sd.u0, sd.y0, sd.CKPT_INT, sd.T, sd.estimation_method, sd.u_type, sd.devID, sd.Q, sd.R)
+	safe = safe_auto_nonlinear_ddrive(sd.func_f, sd.func_A, sd.func_g, sd.func_C, sd.x0, sd.u0, sd.y0, sd.CKPT_INT, sd.T, sd.estimation_method, sd.u_type, sd.devID, sd.Q, sd.R, sd.error_analysis)
 
 	r = rospy.Rate(10)
 	while safe.NOW<sd.T:
@@ -89,13 +89,16 @@ def main():
 		# get estimate and then rf if attack detected and then control
 		x_estimate = safe.get_x_estimate_from_sensors()
 		if safe.check == 0:
-			safe.x, safe.y = x_estimate, safe.func_g(x_estimate)
+			safe.xe, safe.ye = x_estimate, safe.func_g(x_estimate)
 			safe.RF_time_list.append(0)
 		elif safe.check == 1:
 			RF_t = timer_start()
-			safe.x, safe.y = safe.RollForward(x_estimate)
+			safe.xe, safe.ye = safe.RollForward(x_estimate)
 			safe.RF_time_list.append(RF_t.elapsed())
 		safe.u = safe.StartControl()
+
+		if safe.error_analysis==1:
+			safe.do_error_analysis()
 
 		# transform and publish control
 		wR, wL = sd.transform(safe.u)

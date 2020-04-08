@@ -11,11 +11,22 @@ class system_description():
 		self.estimation_method="Kalman" # Kalman or none (for direct sensor measurments)
 		self.T = 12 # run loop for 12 seconds
 		self.CKPT_INT = 1 # create checkpoints every one second
+		self.error_analysis = 1; # 1 if you want error analysis plot
 
 	def func_f(self,x,u,dt):	# x_{k+1} = f(x_k,u_k) and x=[x,y,theta]
+		l=0.01 # also used in StartControl()		
+		# getting x from x_tilda
+		x[0,0] = x[0,0] - l*np.cos(x[2,0])
+		x[1,0] = x[1,0] - l*np.sin(x[2,0])
+
 		xdot = np.array([[u[0,0]*np.cos(x[2,0])], [u[0,0]*np.sin(x[2,0])], [ u[1,0] ]])
 		x = x + xdot*dt
 		x[2,0] = np.arctan(np.sin(x[2,0]) / np.cos(x[2,0]))
+
+		# getting x_tilda from x
+		x[0,0] = x[0,0] + l*np.cos(x[2,0])
+		x[1,0] = x[1,0] + l*np.sin(x[2,0])
+		
 		return x
 
 	def transform(self,u):		# transform [v, w] control to [wR, wL] control

@@ -56,7 +56,7 @@ def main():
 	# Create instance(s) of class(es)
 	sd = system_description()
 	ic = inner_controller()
-	safe = safe_auto_nonlinear(sd.func_f, sd.func_A, sd.func_g, sd.func_C, sd.x0, sd.u0, sd.y0, sd.CKPT_INT, sd.T, sd.estimation_method, sd.u_type, sd.devID, sd.Q, sd.R)
+	safe = safe_auto_nonlinear(sd.func_f, sd.func_A, sd.func_g, sd.func_C, sd.x0, sd.u0, sd.y0, sd.CKPT_INT, sd.T, sd.estimation_method, sd.u_type, sd.devID, sd.Q, sd.R, sd.error_analysis)
 	
 	r = rospy.Rate(100)
 	while safe.NOW<sd.T+0.1:  #see ic.start_time in constructor
@@ -80,12 +80,15 @@ def main():
 		# get estimate and then rf if attack detected
 		x_estimate = safe.get_x_estimate_from_sensors()
 		if safe.check == 0:
-			safe.x, safe.y = x_estimate, safe.func_g(x_estimate)
+			safe.xe, safe.ye = x_estimate, safe.func_g(x_estimate)
 			safe.RF_time_list.append(0)
 		elif safe.check == 1:
 			RF_t = timer_start()
-			safe.x, safe.y = safe.RollForward(x_estimate)
+			safe.xe, safe.ye = safe.RollForward(x_estimate)
 			safe.RF_time_list.append(RF_t.elapsed())
+
+		if safe.error_analysis==1:
+			safe.do_error_analysis()
 
 		# Subscribe to out_control topic to get reference trajectory for inner controller
 		ic.subscribe_to_out()
