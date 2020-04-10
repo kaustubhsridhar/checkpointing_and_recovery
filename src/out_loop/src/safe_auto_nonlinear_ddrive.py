@@ -94,7 +94,8 @@ class safe_auto_nonlinear_ddrive(safe_auto_nonlinear):
 
     def do_error_analysis(self):
 	# get/define LTI system, system bounds info		
-	A = self.func_A(self.xe,self.u); epsilon_delta = np.array([[5],[5],[5]]); epsilon_omega = epsilon_delta; epsilon_gamma = np.array([[0.025],[0.025],[0.025]]) #since omega_k = gamma_k = N(0,0.01)
+	A = np.array([ [0,0,1], [0,0,6], [0,0,0] ])
+	epsilon_delta = np.array([[5],[5],[5]]); epsilon_omega = epsilon_delta; epsilon_gamma = np.array([[0.025],[0.025],[0.025]]) #since omega_k = gamma_k = N(0,0.01)
 	bold_y = np.array([[6],[6],[0]]); Kj = 1*np.eye(3) # since err = + or - [[5],[5],[0]]
 	k_1 = int(self.t_r); k = int(self.NOW)
 
