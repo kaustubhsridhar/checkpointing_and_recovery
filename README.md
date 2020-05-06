@@ -7,7 +7,7 @@ Detailed documentation can be found at:- https://docs.google.com/document/d/1_nz
 * system descriptions python files for each of inner and outer loops created
 * safe_auto_nonlinear_ddrive of outer loop inherits from safe_auto_nonlinear_base
 * In this version of SRSC framework, state is predicted for first time step with sensor attack by rolling-forward all the way from the ckpt and for every subsequent attacked time step with saved previously predicted value
-* modified main files of three nodes such that EKF estimate stored in xe_o (_o for original), roll-forward in xe and GT in x (previous versions without this may be wrong)
+* modified main files of all three loop nodes such that EKF estimate stored in xe_o (_o for original), roll-forward in xe and GT in x (previous versions without this may be wrong)
 * Added error_analysis (including option to turn on and off in system description files)
 
 ## Preliminaries
