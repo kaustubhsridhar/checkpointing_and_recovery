@@ -19,16 +19,16 @@ class safe_auto_nonlinear(object):
         self.estimation_method = EM
         self.T = T; self.dt = 0; self.t_r = self.NOW
         self.x = x0; self.u = u0; self.y = y0; self.CkPt = np.array([x0,u0,y0]); 
-        self.xe = x0; self.ye = y0; self.xe_o = x0; self.ye_o = y0 # _o means orig while no suffix is updated after RF
+        self.xe = x0; self.xe_o = x0; self.ye_o = y0 # _o means orig while no suffix is updated after RF
         
         self.devID = devID
         self.ustore = []; self.ystore = []; self.measured = []; self.actual = []; self.actualy = []; self.predicted = []; self.estimated = []   
 
-        self.yref = 0; self.yref_list = []; self.func_f = func_f; self.func_A = func_A; self.func_g = func_g; self.func_C = func_C
+        self.yref_list = []; self.func_f = func_f; self.func_A = func_A; self.func_g = func_g; self.func_C = func_C
         self.P = np.eye(len(x0))
         self.Q = Q; self.R = R
         
-        self.ydot = 0; self.ydsum = 0
+        self.e = 0; self.eder = 0; self.esum = 0 
         self.interval = interval; 
         self.t_when_CkPt_used_DeadReck = []; self.t_of_CkPt_used_DeadReck = []; self.t_all_CkPts = []
         self.t_when_CkPt_used_Kalman = []; self.t_of_CkPt_used_Kalman = [];
@@ -67,22 +67,25 @@ class safe_auto_nonlinear(object):
     def StartControl(self, w_d): 
         
         # save value predicted after rollfwd
-        self.predicted.append(self.ye[:,0]) #takes first column of np.array
+        self.predicted.append(self.xe[1,0])
         
-        # advance system in simulation
-        selfyold = self.ye
-        self.Advance()
+        # take old values
+        eold = self.e;
+
+	# current angular vel of DC motor
+	omega = self.xe[1,0]
 
         # PID for DC motor with desired value w_d
         if self.u_type == "PID": #PID
             Kp = 6.6/0.5; Kd = 1.1/4; Ki = 6.1/4
-            self.yref = np.array([[w_d[0,0]]])
-            self.ydot = (self.ye-selfyold)/self.dt; self.ydsum = self.ydsum + (self.yref - self.ye)*self.dt
-            self.u = Kp*(self.yref - self.ye) - Kd*self.ydot + Ki*self.ydsum
+            omega_ref = w_d[0,0]
+            self.e = omega_ref - omega
+            self.esum = self.esum + self.e*self.dt; self.eder = (self.e - eold) / self.dt
+            self.u = np.array( [[ Kp*self.e + Kd*self.eder + Ki*self.esum ]] )
         elif self.u_type == "nonlinear":
             self.u = np.array([[0]])
             
-        self.yref_list.append(self.yref) 
+        self.yref_list.append(omega_ref) 
         self.pub_to_actuator()
         return self.u
     
@@ -102,7 +105,7 @@ class safe_auto_nonlinear(object):
 	x[np.where(self.devID==1)] = x_prev[np.where(self.devID==1)]
 	#x[np.where(self.devID==0)] = x[np.where(self.devID==0)]
         
-        return x, self.func_g(x)
+        return x
 
     def RollForward_slow(self, x_prev):
         x = self.CkPt[0]

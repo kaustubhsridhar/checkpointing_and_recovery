@@ -89,11 +89,11 @@ def main():
 		# get estimate and then rf if attack detected and then control
 		x_estimate = safe.get_x_estimate_from_sensors()
 		if safe.check == 0:
-			safe.xe, safe.ye = x_estimate, safe.func_g(x_estimate)
+			safe.xe = x_estimate
 			safe.RF_time_list.append(0)
 		elif safe.check == 1:
 			RF_t = timer_start()
-			safe.xe, safe.ye = safe.RollForward(x_estimate)
+			safe.xe = safe.RollForward(x_estimate)
 			safe.RF_time_list.append(RF_t.elapsed())
 		safe.u = safe.StartControl()
 
@@ -117,6 +117,10 @@ def main():
 
 		#oc.subscribe_to_volts()
 		safe.other_time_list.append(Overall_t.elapsed() - safe.RF_time_list[-1] - safe.CkPt_buffer_time_list[-1])
+
+		# advance system in simulation
+		safe.Advance()
+
 		r.sleep()
 
 	print("PLOTS UPCOMING")

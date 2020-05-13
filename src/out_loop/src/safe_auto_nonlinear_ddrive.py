@@ -8,7 +8,6 @@ class safe_auto_nonlinear_ddrive(safe_auto_nonlinear):
     def __init__(self, func_f, func_A, func_g, func_C, x0, u0, y0, interval, T, EM, u_type, devID, Q, R, EA):
 	super(safe_auto_nonlinear_ddrive, self).__init__(func_f, func_A, func_g, func_C, x0, u0, y0, interval, T, EM, u_type, devID, Q, R, EA) # brings everything over from parent class
 	# add new variables for this child class below
-	self.e = 0; self.eder = 0; self.esum = 0 
 	self.time_to_CkPt_val = 0; self.NOW_old = 0
         
 
@@ -37,21 +36,22 @@ class safe_auto_nonlinear_ddrive(safe_auto_nonlinear):
     def StartControl(self): 
         
         # save value predicted after rollfwd
-        self.predicted.append(self.ye[:,0]) #takes first column of np.array
+        self.predicted.append(self.xe[:,0]) # converts col np.array into list
         
-        # advance system in simulation
+        # take old values
         eold = self.e
-        self.Advance()
+
+	# current states
+	x = self.xe[0,0]; y = self.xe[1,0]; phi = self.xe[2,0]
 
         # PID
         if self.u_type == "PID": #PID
             Kp = 6.6/0.5; Kd = 1.1/4; Ki = 6.1/4
             xref = 2*np.cos(self.NOW); yref = 2*np.sin(self.NOW)
             xref_dot = -yref; yref_dot = xref
-            
             phi_ref = np.arctan(yref_dot / xref_dot)
-            self.e = phi_ref - self.ye[2,0]
-            #self.e = np.arctan(np.sin(phi_ref - self.ye[2,0])/np.cos(phi_ref - self.ye[2,0]))
+
+            self.e = phi_ref - phi
             self.esum = self.esum + self.e*self.dt; self.eder = (self.e - eold) / self.dt
             w = Kp*self.e + Kd*self.eder + Ki*self.esum
             
@@ -65,11 +65,9 @@ class safe_auto_nonlinear_ddrive(safe_auto_nonlinear):
             k1 = 6.6/2; k2 = 6.6/1.5; l = 0.01;
             xref = 2*np.cos(self.NOW); yref = 2*np.sin(self.NOW)
             xref_dot = -yref; yref_dot = xref
-            
             phi_ref = np.arctan( yref - self.xe[1,0] / xref - self.xe[0,0])
-            phi = self.ye[2,0];
-            #phi = phi_ref
-            x = self.ye[0,0] + l*np.cos(phi); y = self.ye[1,0] + l*np.sin(phi)
+
+            x = x + l*np.cos(phi); y = y + l*np.sin(phi)
             v = np.cos(-phi)*( xref_dot + k1*(xref - x) ) - np.sin(-phi)*( yref_dot + k2*(yref - y) )
             w = (np.sin(-phi)*( xref_dot + k1*(xref - x) ) + np.cos(-phi)*( yref_dot+ k2*(yref - y) )) / l
             
