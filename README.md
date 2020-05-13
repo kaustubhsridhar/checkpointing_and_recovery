@@ -9,7 +9,7 @@ Detailed documentation can be found at:- https://docs.google.com/document/d/1_nz
 * In this version of SRSC framework, state is predicted for first time step with sensor attack by rolling-forward all the way from the ckpt and for every subsequent attacked time step with saved previously predicted value
 * modified main files of all three loop nodes such that EKF estimate stored in xe_o (_o stands for original), roll-forward in xe and GT in x (previous versions without this may be wrong)
 * Added error_analysis (including option to turn on and off in system description files)
-* Moved advancing of simulation to node files in in, in_2 and out nodes. Removed ye to reduce redundant variables
+* Moved advancing of simulation to node files in in, in_2 and out nodes. Removed ye to reduce redundant variables. Modified inputs to transform() in outer loop
 
 ## Preliminaries
 Install ROS (http://wiki.ros.org/kinetic/Installation/Ubuntu)
