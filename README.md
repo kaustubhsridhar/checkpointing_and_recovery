@@ -1,4 +1,4 @@
-# Checkpointing and roll-forward recovery for Hierarchical Distributed Control CPS (SRSC framework)
+# Checkpointing and roll-forward recovery for Hierarchical Control CPS
 ROS packages for numerical simulation of checkpointing and roll-forward recovery of state estimates in differential drive mobile robot (and DC motor) system under sensor attacks.
 
 Detailed documentation can be found at:- https://docs.google.com/document/d/1_nz2afkh-SWOh0j6m1g7FoTotDnMQovMn6eUlM3usv8/edit?usp=sharing
