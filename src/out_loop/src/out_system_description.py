@@ -29,7 +29,7 @@ class system_description():
 		
 		return x
 
-	def transform(self,u):		# transform [v, w] control to [wR, wL] control
+	def transform(self,u, u_prev, x, dt): # transform [v, w] control to [wR, wL] control
 		R = 0.05; L = 0.5;
 		v = u[0,0]; w = u[1,0]
 		wR = (2*v + w*L) / (2*R)

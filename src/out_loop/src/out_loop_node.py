@@ -95,13 +95,14 @@ def main():
 			RF_t = timer_start()
 			safe.xe = safe.RollForward(x_estimate)
 			safe.RF_time_list.append(RF_t.elapsed())
+		u_prev = safe.u
 		safe.u = safe.StartControl()
 
 		if safe.error_analysis==1:
 			safe.do_error_analysis()
 
 		# transform and publish control
-		wR, wL = sd.transform(safe.u)
+		wR, wL = sd.transform(safe.u, u_prev, safe.xe, safe.dt)
 		oc.u = np.array([[wR],[wL]])
 		oc.publish_to_out()
 
