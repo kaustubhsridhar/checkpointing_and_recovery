@@ -9,8 +9,8 @@ from out_loop.msg import anomaly
 from coordinator.msg import ckpt_info
 from rf_coordinator.msg import check_info
 from safe_auto_nonlinear_base import timer_start
-from safe_auto_nonlinear_ddrive import safe_auto_nonlinear_ddrive
-from out_system_description import system_description
+from safe_auto_nonlinear_vehicle import safe_auto_nonlinear_ddrive
+from out_system_description_vehicle import system_description
 import numpy as np
  
 class outer_controller():

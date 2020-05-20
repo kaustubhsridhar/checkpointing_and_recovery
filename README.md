@@ -1,15 +1,10 @@
 # Checkpointing and roll-forward recovery for Hierarchical Control CPS
-ROS packages for numerical simulation of checkpointing and roll-forward recovery of state estimates in differential drive mobile robot (and DC motor) system under sensor attacks.
+ROS packages for numerical simulation of checkpointing and roll-forward recovery of state estimates in a car-like mobile robot (and DC motor) system under sensor attacks.
 
 Detailed documentation can be found at:- https://docs.google.com/document/d/1_nz2afkh-SWOh0j6m1g7FoTotDnMQovMn6eUlM3usv8/edit?usp=sharing
 
 ## Update Notes
-* system descriptions python files for each of inner and outer loops created
-* safe_auto_nonlinear_ddrive of outer loop inherits from safe_auto_nonlinear_base
-* In this version of SRSC framework, state is predicted for first time step with sensor attack by rolling-forward all the way from the ckpt and for every subsequent attacked time step with saved previously predicted value
-* modified main files of all three loop nodes such that EKF estimate stored in xe_o (_o stands for original), roll-forward in xe and GT in x (previous versions without this may be wrong)
-* Added error_analysis (including option to turn on and off in system description files)
-* Moved advancing of simulation to node files in in, in_2 and out nodes. Removed ye to reduce redundant variables. Modified inputs to transform() in outer loop
+* ROS package for car-like robot with waypoint generator and outer loop controller in same out_loop node
 
 ## Preliminaries
 Install ROS (http://wiki.ros.org/kinetic/Installation/Ubuntu)
