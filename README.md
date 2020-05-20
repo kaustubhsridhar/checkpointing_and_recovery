@@ -3,8 +3,11 @@ ROS packages for numerical simulation of checkpointing and roll-forward recovery
 
 Detailed documentation can be found at:- https://docs.google.com/document/d/1_nz2afkh-SWOh0j6m1g7FoTotDnMQovMn6eUlM3usv8/edit?usp=sharing
 
+## Version Notes
+* See Branch DiffDrive_Robot or Tag DiffDrive-v1.0 for ROS code of differential drive ground robot case study
+* See Branch Car_Robot or Tag Car-v1.0 for ROS code of car-like ground robot case study
+
 ## Update Notes
-* See Barnch DiffDrive_Robot or Tag DiffDrive-v1.0 for ROS code of differential drive ground robot case study
 * ROS package for car-like robot with waypoint generator and outer loop controller in same out_loop node
 
 ## Preliminaries
