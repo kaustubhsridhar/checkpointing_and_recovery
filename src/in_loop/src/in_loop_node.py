@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import sys; sys.dont_write_bytecode = True # to prevent creation of .pyc files
 import rospy
 from std_msgs.msg import String
 from in_loop.msg import in_control
