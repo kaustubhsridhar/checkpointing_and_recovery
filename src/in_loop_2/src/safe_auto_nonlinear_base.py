@@ -155,7 +155,7 @@ class safe_auto_nonlinear(object):
         return do_CkPt
     
     def create_CkPt(self):
-        self.CkPt = np.array([self.x, self.u, self.y])
+        self.CkPt = np.array([self.xe, self.u, self.y])
         self.t_r = self.NOW 
         self.ustore = [self.u]; self.ystore = [self.y] #remove all u,u before checkpoint
 
