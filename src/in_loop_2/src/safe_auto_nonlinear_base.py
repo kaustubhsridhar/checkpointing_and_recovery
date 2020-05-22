@@ -44,9 +44,9 @@ class safe_auto_nonlinear(object):
         
     def anomaly_detect(self):
         # attack detection algo goes here
-        if self.NOW>=self.s1 and self.NOW <self.e1:
+        if self.NOW>=self.s1 and self.NOW <self.e1+0.1:
             self.devID = np.array([[1],[0]])
-        elif self.NOW>=self.s2 and self.NOW <self.e2:
+        elif self.NOW>=self.s2 and self.NOW <self.e2+0.1:
             self.devID = np.array([[1],[0]])
         else:
             self.devID = np.array([[1],[1]])
@@ -180,7 +180,7 @@ class safe_auto_nonlinear(object):
             if self.check==0:    
                 # if an attack has just finished & currently not under attack, start new KF from new rollfwd data predicted checkpoint
                 if self.attk_ct>0 and self.change == -1:            
-                    self.xe_o = self.CkPt[0]
+                    self.xe_o = self.xe#self.CkPt[0]
             # predict
             self.xe_o = self.func_f(self.xe_o, self.u, self.dt)
             A = self.func_A(self.xe_o, self.u)

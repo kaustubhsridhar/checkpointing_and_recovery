@@ -53,7 +53,7 @@ class safe_auto_nonlinear_ddrive(safe_auto_nonlinear):
 			#print(waypt_list)
 
 		# return waypoint at Look ahead distance or just beyond
-		Ld = 0.95*A/2 # tune
+		Ld = 0.94*A/2 # tune
 		for tup in self.waypt_list[int(self.NOW/0.1):]:
 			dist = ((tup[0] - x)**2 + (tup[1] - (y))**2)**(0.5)
 		
@@ -142,25 +142,35 @@ class safe_auto_nonlinear_ddrive(safe_auto_nonlinear):
 		xaxis = np.reshape(np.array(self.NOW_list), (len(self.yref_list), 1))
 		
 		cdn0_a = (xaxis<=(self.e1-self.dt))
-		cdn0_b = (xaxis>=(self.e1)) & (xaxis<=(self.e2-self.dt)) 
-		cdn0_c = (xaxis>=self.e2)
-		cdn0_a_big = np.append(cdn0_a, cdn0_a, axis=1) # code was updated here post latest github update
+		cdn0_b = (xaxis>=(self.e1-self.dt)) & (xaxis<=(self.e2-self.dt)) 
+		cdn0_c = (xaxis>=self.e2-self.dt)
+		cdn0_a_big = np.append(cdn0_a, cdn0_a, axis=1)
 		cdn0_b_big = np.append(cdn0_b, cdn0_b, axis=1) 
 		cdn0_c_big = np.append(cdn0_c, cdn0_c, axis=1) 
+
+		cdn1_a = (xaxis>=(self.s1-2*self.dt)) & (xaxis<=(self.e1))
+		cdn1_b = (xaxis>=(self.s2-2*self.dt)) & (xaxis<=self.e2)
+		cdn1_a_big = np.append(cdn1_a, cdn1_a, axis=1)
+		cdn1_b_big = np.append(cdn1_b, cdn1_b, axis=1)
 		for j in range(len(self.x)-2):
 			cdn0_a_big = np.append(cdn0_a_big, cdn0_a, axis=1)
 			cdn0_b_big = np.append(cdn0_b_big, cdn0_b, axis=1)
-			cdn0_c_big = np.append(cdn0_c_big, cdn0_c, axis=1) # till here ...
-		
+			cdn0_c_big = np.append(cdn0_c_big, cdn0_c, axis=1)
+
+			cdn1_a_big = np.append(cdn1_a_big, cdn1_a, axis=1)
+			cdn1_b_big = np.append(cdn1_b_big, cdn1_b, axis=1)
 		self.actual = np.array(self.actual)
 		self.actualy = np.array(self.actualy)
 		self.measured = np.array(self.measured)
 		self.estimated = np.array(self.estimated)
+		pred_arr = np.reshape(np.array(self.predicted), (len(self.predicted), len(self.x)))
 		
 		if self.estimation_method == "none":
 		    plt.plot(xaxis, reference[:,i], 'blue')
 		    plt.plot(xaxis, self.actual[:,i], 'yellow')
 		    plt.plot(xaxis, self.measured[:,i], 'green')
+		    plt.plot(xaxis[cdn1_a], np.reshape(pred_arr[cdn1_a_big], ( sum(cdn1_a),len(self.x) ))[:,i], color='red')
+		    plt.plot(xaxis[cdn1_b], np.reshape(pred_arr[cdn1_b_big], ( sum(cdn1_b),len(self.x) ))[:,i], color='red')
 		elif self.estimation_method == "Kalman":
 		    plt.plot(xaxis, reference[:,i], 'blue')
 		    plt.plot(xaxis, self.actualy[:,i], color='grey')
@@ -170,25 +180,14 @@ class safe_auto_nonlinear_ddrive(safe_auto_nonlinear):
 		    xEKF1 = np.reshape( est_reshaped[np.where(cdn0_a_big)], ( sum(cdn0_a),len(self.x) ))
 		    xEKF2 = np.reshape( est_reshaped[np.where(cdn0_b_big)], ( sum(cdn0_b),len(self.x) ))
 		    xEKF3 = np.reshape( est_reshaped[np.where(cdn0_c_big)], ( sum(cdn0_c),len(self.x) ))
-
-		    plt.plot(xaxis[cdn0_a], xEKF1[:,i], color='purple', linestyle = '--')
+		    plt.plot(xaxis[cdn0_a], xEKF1[:,i], color='magenta', linestyle = '--')
+		    plt.plot(xaxis[cdn1_a], np.reshape(pred_arr[cdn1_a_big], ( sum(cdn1_a),len(self.x) ))[:,i], color='red')
 		    plt.plot(xaxis[cdn0_b], xEKF2[:,i], color='magenta', linestyle = '--')
-		    plt.plot(xaxis[cdn0_c], xEKF3[:,i], color='violet', linestyle = '--')
-		cdn1_a = (xaxis>=(self.s1-2*self.dt)) & (xaxis<=(self.e1))
-		cdn1_b = (xaxis>=(self.s2-2*self.dt)) & (xaxis<=self.e2)
-		cdn1_a_big = np.append(cdn1_a, cdn1_a, axis=1) # code was updated here post latest github update
-		cdn1_b_big = np.append(cdn1_b, cdn1_b, axis=1)
-		for k in range(len(self.x)-2):
-			cdn1_a_big = np.append(cdn1_a_big, cdn1_a, axis=1)
-			cdn1_b_big = np.append(cdn1_b_big, cdn1_b, axis=1) # till here ...
-
-		pred_arr = np.reshape(np.array(self.predicted), (len(self.predicted), len(self.x)))
-		
-		plt.plot(xaxis[cdn1_a], np.reshape(pred_arr[cdn1_a_big], ( sum(cdn1_a),len(self.x) ))[:,i], color='red')
-		plt.plot(xaxis[cdn1_b], np.reshape(pred_arr[cdn1_b_big], ( sum(cdn1_b),len(self.x) ))[:,i], color='red')
-		
+		    plt.plot(xaxis[cdn1_b], np.reshape(pred_arr[cdn1_b_big], ( sum(cdn1_b),len(self.x) ))[:,i], color='red')
+		    plt.plot(xaxis[cdn0_c], xEKF3[:,i], color='magenta', linestyle = '--')	
+	
 		if self.estimation_method == "Kalman":
-		    plt.legend(['ref', 'GT', 'M', 'EKF1', 'EKF2', 'EKF3', 'RF'], prop={"size":20})
+		    plt.legend(['ref', 'GT', 'M', 'EKF', 'RF'], prop={"size":20})
 		elif self.estimation_method == "none":
 		    plt.legend(['ref', 'GT', 'M', 'RF'], prop={"size":20})
         	if i == 0: 
@@ -219,17 +218,19 @@ class safe_auto_nonlinear_ddrive(safe_auto_nonlinear):
         plt.plot(self.measured[:,0], self.measured[:,1], 'green')
 	if self.estimation_method == "none":
 		plt.plot(self.actual[:,0], self.actual[:,1], 'grey')
+		plt.plot(np.reshape(pred_arr[cdn1_a_big], (sum(cdn1_a),len(self.x)))[:,0], np.reshape(pred_arr[cdn1_a_big], (sum(cdn1_a),len(self.x)))[:,1], 'red')
+		plt.plot(np.reshape(pred_arr[cdn1_b_big], (sum(cdn1_b),len(self.x)))[:,0], np.reshape(pred_arr[cdn1_b_big], (sum(cdn1_b),len(self.x)))[:,1], 'red')
 	elif self.estimation_method == "Kalman":
 		plt.plot(self.actualy[:,0], self.actualy[:,1], 'grey')
-		plt.plot(xEKF1[:,0], xEKF1[:,1], color='purple', linestyle = '--')
+		plt.plot(xEKF1[:,0], xEKF1[:,1], color='magenta', linestyle = '--')
+		plt.plot(np.reshape(pred_arr[cdn1_a_big], (sum(cdn1_a),len(self.x)))[:,0], np.reshape(pred_arr[cdn1_a_big], (sum(cdn1_a),len(self.x)))[:,1], 'red')
 		plt.plot(xEKF2[:,0], xEKF2[:,1], color='magenta', linestyle = '--')
-		plt.plot(xEKF3[:,0], xEKF3[:,1], color='violet', linestyle = '--')
-	plt.plot(np.reshape(pred_arr[cdn1_a_big], (sum(cdn1_a),len(self.x)))[:,0], np.reshape(pred_arr[cdn1_a_big], (sum(cdn1_a),len(self.x)))[:,1], 'red')
-	plt.plot(np.reshape(pred_arr[cdn1_b_big], (sum(cdn1_b),len(self.x)))[:,0], np.reshape(pred_arr[cdn1_b_big], (sum(cdn1_b),len(self.x)))[:,1], 'red')
+		plt.plot(np.reshape(pred_arr[cdn1_b_big], (sum(cdn1_b),len(self.x)))[:,0], np.reshape(pred_arr[cdn1_b_big], (sum(cdn1_b),len(self.x)))[:,1], 'red')
+		plt.plot(xEKF3[:,0], xEKF3[:,1], color='magenta', linestyle = '--')
         	
 	
 	if self.estimation_method == "Kalman":
-		plt.legend(['ref', 'M', 'GT', 'EKF1', 'EKF2', 'EKF3', 'RF'])
+		plt.legend(['ref', 'M', 'GT', 'EKF', 'RF'])
 	elif self.estimation_method == "none":
 		plt.legend(['ref', 'M', 'GT', 'RF'])
 
