@@ -1,4 +1,6 @@
-# Checkpointing and roll-forward recovery for Hierarchical Control CPS
+# A Framework for Checkpointing and Recovery of Hierarchical Cyber-Physical Systems
+Code for the paper available at https://arxiv.org/abs/2205.08650
+
 ROS packages for numerical simulation of checkpointing and roll-forward recovery of state estimates in a car-like mobile robot (and DC motor) system under sensor attacks.
 
 Detailed documentation can be found at:- https://docs.google.com/document/d/1_nz2afkh-SWOh0j6m1g7FoTotDnMQovMn6eUlM3usv8/edit?usp=sharing
